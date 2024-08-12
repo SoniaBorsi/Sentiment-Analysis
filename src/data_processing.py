@@ -114,15 +114,11 @@ def generate_wordcloud(text, stopwords_set, title):
 # Main function to execute the analysis pipeline
 def main():
     # Load the dataset
-    df = pd.read_csv('/Users/soniaborsi/Desktop/comments.csv')
+    df = pd.read_csv('comments.csv')
     
     # Extract features
     df = extract_features(df)
-    
-    # Save the results to a new CSV file
-    df.to_csv('comments_with_sentiment_and_features.csv', index=False)
-    print("Sentiment analysis and feature extraction complete. Results saved to comments_with_sentiment_and_features.csv.")
-    
+
     # Plot features
     try:
         plot_features(df)
