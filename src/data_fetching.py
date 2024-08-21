@@ -2,23 +2,23 @@ import requests
 import csv
 
 
-api_key = ' Your API key '
-video_id = ' Video ID from the URL '
-url = ' YouTube API URL '
+api_key = 'AIzaSyAwHjR8O6X0Q3wEpzoiWgvT5c5PyoauNMo'
+video_id = 'qqG96G8YdcE'
+url = 'https://www.googleapis.com/youtube/v3/commentThreads'
 
 # Request parameters
 params = {
     'part': 'snippet',
     'videoId': video_id,
     'key': api_key,
-    'maxResults': 100  # Fetch up to 100 comments per request
+    'maxResults': 100 
 }
 
 def fetch_comments(limit=5000):
     all_comments = []
     next_page_token = None
     
-    while len(all_comments) < limit:  # Loop until we fetch 5000 comments
+    while len(all_comments) < limit:  
         if next_page_token:
             params['pageToken'] = next_page_token
         
@@ -38,10 +38,8 @@ def fetch_comments(limit=5000):
             print(f"Error: {response.status_code} - {response.text}")
             break
     
-    # Return only the first `limit` comments, in case the last fetch exceeds the limit
     return all_comments[:limit]  
 
-# Fetch comments
 comments = fetch_comments(limit=5000)
 
 # Save comments to a CSV file
