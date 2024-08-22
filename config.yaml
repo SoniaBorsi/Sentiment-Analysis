@@ -1,5 +1,0 @@
-input_file: 'preprocessed_comments.csv'
-stopwords_to_keep: ['not']
-max_words_wordcloud: 50
-wordcloud_width: 3000
-wordcloud_height: 1500

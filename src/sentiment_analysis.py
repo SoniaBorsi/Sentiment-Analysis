@@ -14,7 +14,13 @@ import textstat
 from sklearn.decomposition import PCA
 import numpy as np
 import pyLDAvis.gensim_models as gensimvis
+from sklearn.feature_extraction.text import CountVectorizer
+from gensim.models.coherencemodel import CoherenceModel
+from gensim.corpora.dictionary import Dictionary
+import gensim
+import random
 
+random.seed(42) 
 
 def analyze_sentiment(text):
     sia = SentimentIntensityAnalyzer()
@@ -111,7 +117,7 @@ def topic_modeling(corpus, n_topics, stopwords_set):
     
     try:
         panel = gensimvis.prepare(lda_gensim, corpus_gensim, id2word)
-        pyLDAvis.save_html(panel, 'lda_vis.html')
+        pyLDAvis.save_html(panel, 'plots/lda_vis.html')
         print("LDA visualization saved as 'lda_vis.html'")
         
         pca = PCA(n_components=2)
@@ -143,45 +149,13 @@ def topic_modeling(corpus, n_topics, stopwords_set):
             ax.set_title(f'Top-30 Most Relevant Terms for Topic {i+1}')
             ax.legend()
             plt.tight_layout()
-            fig.savefig(f'top30_terms_topic_{i+1}.pdf')
+            fig.savefig(f'plots/top30_terms_topic_{i+1}.pdf')
             plt.close(fig)
         
     except Exception as e:
         print(f"Error during visualization: {e}")
     
     return topics
-
-def grid_search_optimal_topics(corpus, stopwords_set, start=2, end=10):
-    best_n_topics = start
-    best_coherence = 0
-    coherence_scores = []
-
-    for n_topics in range(start, end + 1):
-        print(f"Testing {n_topics} topics...")
-        try:
-            topics, coherence_score = topic_modeling(corpus, n_topics, stopwords_set)
-            coherence_scores.append(coherence_score)
-
-            if coherence_score > best_coherence:
-                best_coherence = coherence_score
-                best_n_topics = n_topics
-
-            print(f"Number of topics: {n_topics}, Coherence Score: {coherence_score}")
-        except Exception as e:
-            print(f"Error for {n_topics} topics: {e}")
-            coherence_scores.append(None)
-
-    print(f"\nOptimal number of topics: {best_n_topics}, with a Coherence Score of: {best_coherence}")
-
-    plt.figure(figsize=(10, 5))
-    plt.plot(range(start, end + 1), coherence_scores, marker='o')
-    plt.xlabel('Number of Topics')
-    plt.ylabel('Coherence Score')
-    plt.title('Coherence Score vs Number of Topics')
-    plt.grid(True)
-    plt.show()
-
-    return best_n_topics, best_coherence
 
 
 def plot_intertopic_distance_map(lda_sklearn, n_topics):
@@ -201,8 +175,9 @@ def plot_intertopic_distance_map(lda_sklearn, n_topics):
     plt.grid(True)
     plt.colorbar(label='Topic Number')
     plt.tight_layout()
-    plt.savefig('intertopic_distance_map_improved.pdf')
+    plt.savefig('intertopic_distance_map.pdf')
     plt.show()
+
 
 def display_topics(topics):
     for topic, words in topics.items():
@@ -250,11 +225,9 @@ def main():
     
     try:
         print("\nPerforming Grid Search for Optimal Number of Topics...")
-        optimal_n_topics, optimal_coherence = grid_search_optimal_topics(df['Processed comments'], stopwords_set, start=2, end=10)
-        print(f"Optimal number of topics: {optimal_n_topics} with a coherence score of {optimal_coherence:.4f}")
         
         print("\nPerforming Topic Modeling with Optimal Number of Topics...")
-        topics = topic_modeling(df['Processed comments'], n_topics=optimal_n_topics, stopwords_set=stopwords_set)
+        topics = topic_modeling(df['Processed comments'], n_topics=5, stopwords_set=stopwords_set)
         display_topics(topics)
     
     except Exception as e:
@@ -262,3 +235,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    

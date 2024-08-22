@@ -54,9 +54,9 @@ def main():
     print("Sample of processed comments:", df['Processed comments'].head(10))
     
     # Save the preprocessed data to a new CSV file
-    df.to_csv('preprocessed_comments.csv', index=False)
+    df.to_csv('data/preprocessed_comments.csv', index=False)
     print("Data preprocessing completed and saved to 'preprocessed_comments.csv'.")
 
 # Execute the main function
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

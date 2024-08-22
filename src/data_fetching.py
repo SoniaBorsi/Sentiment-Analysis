@@ -2,9 +2,9 @@ import requests
 import csv
 
 
-api_key = 'AIzaSyAwHjR8O6X0Q3wEpzoiWgvT5c5PyoauNMo'
-video_id = 'qqG96G8YdcE'
-url = 'https://www.googleapis.com/youtube/v3/commentThreads'
+api_key = 'your API key'
+video_id = 'video ID'
+url = 'URL video'
 
 # Request parameters
 params = {
@@ -42,11 +42,11 @@ def fetch_comments(limit=5000):
 
 comments = fetch_comments(limit=5000)
 
-# Save comments to a CSV file
-with open('comments.csv', 'w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-    writer.writerow(['Comment Number', 'Comment Content'])  # Header row
-    for idx, comment in enumerate(comments, start=1):
-        writer.writerow([idx, comment])
+# # Save comments to a CSV file
+# with open('comments.csv', 'w', newline='', encoding='utf-8') as file:
+#     writer = csv.writer(file)
+#     writer.writerow(['Comment Number', 'Comment Content'])  # Header row
+#     for idx, comment in enumerate(comments, start=1):
+#         writer.writerow([idx, comment])
 
-print(f"Saved {len(comments)} comments to comments.csv.")
+# print(f"Saved {len(comments)} comments to comments.csv.")
