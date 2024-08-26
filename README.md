@@ -1,4 +1,4 @@
-# Sentiment Analysis on Biden and Trump first Presidential Debate (2024)
+# racking Public Opinion: Sentiment Analysis of YouTube Comments on Biden-Trump 2024 Campaign Events
 
 Clone the repository and run the main script:
 ```bash
