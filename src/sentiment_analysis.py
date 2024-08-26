@@ -19,6 +19,7 @@ from gensim.models.coherencemodel import CoherenceModel
 from gensim.corpora.dictionary import Dictionary
 import gensim
 import random
+import logging
 
 random.seed(42) 
 
@@ -94,100 +95,141 @@ def generate_wordcloud(text, stopwords_set, title):
     plt.title(title, fontsize=20, color='blue')
     plt.show()
 
-def topic_modeling(corpus, n_topics, stopwords_set):
-    vectorizer = TfidfVectorizer(stop_words=list(stopwords_set), ngram_range=(1, 2))
+# def display_topics(topics):
+#     for topic, words in topics.items():
+#         print(f"\n{topic}:")
+#         df = pd.DataFrame(list(words.items()), columns=['Word', 'Weight'])
+#         print(df.sort_values(by='Weight', ascending=False))
+
+
+def vectorize_corpus(corpus, stopwords_set, ngram_range=(1, 2)):
+    vectorizer = CountVectorizer(stop_words=list(stopwords_set), ngram_range=ngram_range)
     dtm = vectorizer.fit_transform(corpus)
-    
-    lda_sklearn = LatentDirichletAllocation(n_components=n_topics, max_iter=10, learning_method='online', random_state=42)
-    lda_sklearn.fit(dtm)
-    
+    return dtm, vectorizer
+
+def fit_lda_sklearn(dtm, n_topics):
+    lda = LatentDirichletAllocation(n_components=n_topics, max_iter=10, learning_method='online', random_state=42)
+    lda.fit(dtm)
+    return lda
+
+def fit_lda_gensim(dtm, vectorizer, n_topics):
     corpus_gensim = Sparse2Corpus(dtm, documents_columns=False)
     id2word = Dictionary([vectorizer.get_feature_names_out()])
-    
-    lda_gensim = LdaModel(corpus=corpus_gensim, num_topics=n_topics, id2word=id2word, passes=1, random_state=42)
-    
-    topics = {}
-    for index, topic in enumerate(lda_sklearn.components_):
-        topics[f"Topic {index+1}"] = {vectorizer.get_feature_names_out()[i]: topic[i] for i in topic.argsort()[-10:]}
-    
+    lda = LdaModel(corpus=corpus_gensim, num_topics=n_topics, id2word=id2word, passes=10, random_state=42)
+    return lda, id2word, corpus_gensim
+
+def compute_coherence(lda_gensim, corpus_gensim, id2word, corpus):
     tokenized_corpus = [doc.split() for doc in corpus]
-    coherence_model_lda = CoherenceModel(model=lda_gensim, texts=tokenized_corpus, dictionary=id2word, coherence='c_v')
-    coherence_lda = coherence_model_lda.get_coherence()
-    print(f'Coherence Score: {coherence_lda}')
+    coherence_model = CoherenceModel(model=lda_gensim, texts=tokenized_corpus, dictionary=id2word, coherence='c_v')
+    coherence = coherence_model.get_coherence()
+    return coherence
+
+def plot_intertopic_distance(lda_sklearn, n_topics):
+    pca = PCA(n_components=2)
+    topic_coordinates = pca.fit_transform(lda_sklearn.components_)
+    
+    plt.figure(figsize=(10, 7))
+    plt.scatter(topic_coordinates[:, 0], topic_coordinates[:, 1], s=100)
+    for i in range(n_topics):
+        plt.text(topic_coordinates[i, 0], topic_coordinates[i, 1], f'Topic {i+1}', fontsize=12)
+    plt.title("Intertopic Distance Map (PCA)")
+    plt.xlabel("PC1")
+    plt.ylabel("PC2")
+    plt.tight_layout()
+    plt.savefig('plots/intertopic_distance_map.pdf')
+    plt.close()
+
+def plot_top_terms(lda_sklearn, vectorizer, dtm, n_topics):
+    for i in range(n_topics):
+        topic_terms = lda_sklearn.components_[i]
+        sorted_terms = topic_terms.argsort()[::-1][:30]
+        terms = vectorizer.get_feature_names_out()[sorted_terms]
+        freqs = topic_terms[sorted_terms]
+        
+        term_freqs = np.array(dtm.sum(axis=0)).flatten()
+        overall_freqs = term_freqs[sorted_terms]
+        
+        fig, ax = plt.subplots(figsize=(10, 7))
+        ax.barh(terms[::-1], freqs[::-1], color='blue', alpha=0.7, label='Estimated term frequency within the topic')
+        ax.barh(terms[::-1], overall_freqs[::-1], color='red', alpha=0.3, label='Overall term frequency')
+        ax.set_xlabel('Frequency')
+        ax.set_title(f'Top-30 Most Relevant Terms for Topic {i+1}')
+        ax.legend()
+        plt.tight_layout()
+        plt.savefig(f'plots/top30_terms_topic_{i+1}.pdf')
+        plt.close(fig)
+
+def visualize_lda(lda_gensim, corpus_gensim, id2word):
+    panel = gensimvis.prepare(lda_gensim, corpus_gensim, id2word)
+    pyLDAvis.save_html(panel, 'plots/lda_vis.html')
+    print("LDA visualization saved as 'lda_vis.html'")
+
+
+def find_optimal_number_of_topics(corpus, stopwords_set, start=2, end=3, step=1):
+    dtm, vectorizer = vectorize_corpus(corpus, stopwords_set)
+    
+    coherence_values = []
+    model_list = []
+    
+    for n_topics in range(start, end, step):
+        lda_gensim, id2word, corpus_gensim = fit_lda_gensim(dtm, vectorizer, n_topics)
+        coherence = compute_coherence(lda_gensim, corpus_gensim, id2word, corpus)
+        coherence_values.append(coherence)
+        model_list.append((lda_gensim, id2word, corpus_gensim))
+        print(f"Number of topics: {n_topics}, Coherence Score: {coherence}")
+    
+    # Plot coherence score against the number of topics
+    # plt.figure(figsize=(10, 7))
+    # plt.plot(range(start, end, step), coherence_values)
+    # plt.xlabel("Number of Topics")
+    # plt.ylabel("Coherence Score")
+    # plt.title("Coherence Score by Number of Topics")
+    # plt.grid(True)
+    # plt.savefig('plots/coherence_scores.png')
+    # plt.close()
+    
+    # Find the optimal number of topics
+    optimal_index = coherence_values.index(max(coherence_values))
+    optimal_n_topics = range(start, end, step)[optimal_index]
+    print(f"Optimal number of topics: {optimal_n_topics} with Coherence Score: {coherence_values[optimal_index]}")
+    
+    # Return the optimal model and its components
+    optimal_model, id2word, corpus_gensim = model_list[optimal_index]
+    return optimal_n_topics, optimal_model, id2word, corpus_gensim
+
+
+
+def topic_modeling(corpus, stopwords_set):
+    # Find the optimal number of topics
+    optimal_n_topics, lda_gensim, id2word, corpus_gensim = find_optimal_number_of_topics(corpus, stopwords_set)
+    
+    # Fit the optimal LDA model with sklearn (optional)
+    dtm, vectorizer = vectorize_corpus(corpus, stopwords_set)
+    lda_sklearn = fit_lda_sklearn(dtm, optimal_n_topics)
+    
+    # Calculate coherence for the optimal number of topics
+    coherence_lda = compute_coherence(lda_gensim, corpus_gensim, id2word, corpus)
+    print(f'Coherence Score for optimal model: {coherence_lda}')
     
     try:
-        panel = gensimvis.prepare(lda_gensim, corpus_gensim, id2word)
-        pyLDAvis.save_html(panel, 'plots/lda_vis.html')
-        print("LDA visualization saved as 'lda_vis.html'")
-        
-        pca = PCA(n_components=2)
-        topic_coordinates = pca.fit_transform(lda_sklearn.components_)
-        
-        plt.figure(figsize=(10, 7))
-        plt.scatter(topic_coordinates[:, 0], topic_coordinates[:, 1], s=100)
-        for i in range(n_topics):
-            plt.text(topic_coordinates[i, 0], topic_coordinates[i, 1], f'Topic {i+1}', fontsize=12)
-        plt.title("Intertopic Distance Map (PCA)")
-        plt.xlabel("PC1")
-        plt.ylabel("PC2")
-        plt.savefig('intertopic_distance_map.pdf')
-        plt.close()
-
-        for i in range(n_topics):
-            topic_terms = lda_sklearn.components_[i]
-            sorted_terms = topic_terms.argsort()[::-1][:30]
-            terms = vectorizer.get_feature_names_out()[sorted_terms]
-            freqs = topic_terms[sorted_terms]
-            
-            term_freqs = np.array(dtm.sum(axis=0)).flatten()
-            overall_freqs = term_freqs[sorted_terms]
-            
-            fig, ax = plt.subplots(figsize=(10, 7))
-            ax.barh(terms[::-1], freqs[::-1], color='blue', alpha=0.7, label='Estimated term frequency within the topic')
-            ax.barh(terms[::-1], overall_freqs[::-1], color='red', alpha=0.3, label='Overall term frequency')
-            ax.set_xlabel('Frequency')
-            ax.set_title(f'Top-30 Most Relevant Terms for Topic {i+1}')
-            ax.legend()
-            plt.tight_layout()
-            fig.savefig(f'plots/top30_terms_topic_{i+1}.pdf')
-            plt.close(fig)
+        # Visualize the optimal LDA model
+        visualize_lda(lda_gensim, corpus_gensim, id2word)
+        plot_intertopic_distance(lda_sklearn, optimal_n_topics)
+        plot_top_terms(lda_sklearn, vectorizer, dtm, optimal_n_topics)
         
     except Exception as e:
         print(f"Error during visualization: {e}")
     
+    # Extract topics from the optimal model
+    topics = {}
+    for index, topic in enumerate(lda_sklearn.components_):
+        topics[f"Topic {index+1}"] = {vectorizer.get_feature_names_out()[i]: topic[i] for i in topic.argsort()[-10:]}
+    
     return topics
 
 
-def plot_intertopic_distance_map(lda_sklearn, n_topics):
-    pca = PCA(n_components=2)
-    topic_coordinates = pca.fit_transform(lda_sklearn.components_)
-    
-    plt.figure(figsize=(12, 9))
-    plt.scatter(topic_coordinates[:, 0], topic_coordinates[:, 1], s=200, c=range(n_topics), cmap='tab10', alpha=0.7)
-    
-    for i in range(n_topics):
-        plt.text(topic_coordinates[i, 0] + 1, topic_coordinates[i, 1] + 1, 
-                 f'Topic {i+1}', fontsize=14, weight='bold', color='black', ha='center')
-    
-    plt.title("Intertopic Distance Map (PCA)", fontsize=16, weight='bold')
-    plt.xlabel("PC1", fontsize=14)
-    plt.ylabel("PC2", fontsize=14)
-    plt.grid(True)
-    plt.colorbar(label='Topic Number')
-    plt.tight_layout()
-    plt.savefig('intertopic_distance_map.pdf')
-    plt.show()
-
-
-def display_topics(topics):
-    for topic, words in topics.items():
-        print(f"\n{topic}:")
-        df = pd.DataFrame(list(words.items()), columns=['Word', 'Weight'])
-        print(df.sort_values(by='Weight', ascending=False))
-
-
 def main():
-    df = pd.read_csv('data/preprocessed_comments.csv')
+    df = pd.read_csv('data/processed_comments.csv')
     df['Processed comments'] = df['Processed comments'].astype(str)
     df = extract_features(df)
     
@@ -224,16 +266,13 @@ def main():
         print(f"Error generating WordCloud: {e}")
     
     try:
-        print("\nPerforming Grid Search for Optimal Number of Topics...")
-        
-        print("\nPerforming Topic Modeling with Optimal Number of Topics...")
-        topics = topic_modeling(df['Processed comments'], n_topics=5, stopwords_set=stopwords_set)
-        display_topics(topics)
+        print("\nPerforming Topic Modeling...")
+        topic_modeling(df['Processed comments'], stopwords_set)
+        #display_topics(topics)
     
     except Exception as e:
         print(f"Error during Topic Modeling: {e}")
 
+
 if __name__ == "__main__":
     main()
-
-    

@@ -5,6 +5,9 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
+from bs4 import BeautifulSoup
+import unicodedata
+import contractions
 
 # Ensure necessary NLTK resources are downloaded
 # nltk.download('punkt')
@@ -12,31 +15,53 @@ from nltk.stem import WordNetLemmatizer
 # nltk.download('stopwords')
 
 # Define text cleaning function with emoji removal
+# Enhanced text cleaning function
 def text_cleaning(text):
     text = text.lower()  # Convert to lowercase
-    text = text.encode('ascii', 'ignore').decode('ascii')  # Remove emojis and other non-ASCII characters
-    punc = str.maketrans(string.punctuation, ' '*len(string.punctuation))  # Create translation table for punctuation
-    text = text.translate(punc)  # Remove punctuation
-    text = re.sub(r'\d+', '', text)  # Remove digits
-    text = re.sub(r'https?://\S+|www\.\S+', '', text)  # Remove URLs
-    text = re.sub(r'\n', ' ', text)  # Replace newlines with space
-    text = re.sub(r'\s+', ' ', text).strip()  # Replace multiple spaces with a single space
+    
+    # Remove HTML tags
+    text = BeautifulSoup(text, "html.parser").get_text()
+    
+    # Expand contractions
+    text = contractions.fix(text)
+    
+    # Normalize unicode characters
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+    
+    # Create translation table for punctuation and remove it
+    punc = str.maketrans('', '', string.punctuation)
+    text = text.translate(punc)
+    
+    # Remove digits
+    text = re.sub(r'\d+', '', text)
+    
+    # Remove URLs
+    text = re.sub(r'https?://\S+|www\.\S+', '', text)
+    
+    # Replace newlines with space
+    text = re.sub(r'\n', ' ', text)
+    
+    # Replace multiple spaces with a single space
+    text = re.sub(r'\s+', ' ', text).strip()
+    
     return text
 
-# Define text processing function
+# Enhanced text processing function
 def text_processing(text):
     stopwords_set = set(stopwords.words("english")) - set(["not"])  # Define stopwords set
     lemmatizer = WordNetLemmatizer()  # Initialize lemmatizer
     tokens = word_tokenize(text)  # Tokenize text
-    processed_text = [lemmatizer.lemmatize(word) for word in tokens if word not in stopwords_set]  # Lemmatize and remove stopwords
+    
+    # Lemmatize and remove stopwords
+    processed_text = [lemmatizer.lemmatize(word) for word in tokens if word not in stopwords_set]
+    
     return " ".join(processed_text)
 
-# Define preprocessing function
+# Preprocessing function
 def preprocess_text(text):
     cleaned_text = text_cleaning(text)  # Clean the text
     processed_text = text_processing(cleaned_text)  # Process the text
     return processed_text
-
 
 def main():
     # Load the dataset
@@ -54,9 +79,9 @@ def main():
     print("Sample of processed comments:", df['Processed comments'].head(10))
     
     # Save the preprocessed data to a new CSV file
-    df.to_csv('data/preprocessed_comments.csv', index=False)
-    print("Data preprocessing completed and saved to 'preprocessed_comments.csv'.")
+    df.to_csv('data/processed_comments.csv', index=False)
+    print("Data preprocessing completed and saved to 'processed_comments.csv'.")
 
 # Execute the main function
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
