@@ -1,11 +1,10 @@
 import sys
 import os
-
-sys.path.append(os.path.dirname(__file__))
-
 from data_fetching import fetch_comments
 from data_cleaning import main as data_cleaning_main
 from sentiment_analysis import main as sentiment_analysis_main
+
+sys.path.append(os.path.dirname(__file__))
 
 def save_comments_to_csv(comments, filename):
     import csv
