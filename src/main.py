@@ -29,7 +29,6 @@ def run_sentiment_analysis():
     sentiment_analysis_main()
 
 if __name__ == "__main__":
-    # Create the 'data' directory if it doesn't exist
     if not os.path.exists('data'):
         os.makedirs('data')
 
