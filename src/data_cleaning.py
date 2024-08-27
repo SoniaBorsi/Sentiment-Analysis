@@ -65,7 +65,7 @@ def preprocess_text(text):
 
 def main():
     # Load the dataset
-    df = pd.read_csv('data/comments.csv')
+    df = pd.read_csv('data/comments_debate.csv')
     
     # Preprocess the data
     df['Processed comments'] = df['Comment Content'].apply(preprocess_text)
@@ -79,8 +79,8 @@ def main():
     print("Sample of processed comments:", df['Processed comments'].head(10))
     
     # Save the preprocessed data to a new CSV file
-    df.to_csv('data/processed_comments.csv', index=False)
-    print("Data preprocessing completed and saved to 'processed_comments.csv'.")
+    df.to_csv('data/processed_comments_debate.csv', index=False)
+    print("Data preprocessing completed and saved to 'processed_comments_debate.csv'.")
 
 # Execute the main function
 if __name__ == "__main__":

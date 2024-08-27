@@ -2,9 +2,11 @@ import requests
 import csv
 
 
-api_key = 'your API key'
-video_id = 'video_id_trump_vs_biden'
-video_id_trump_vs_biden = 'qqG96G8YdcE' 
+# api_key = 'your API key'
+
+api_key = 'AIzaSyAwHjR8O6X0Q3wEpzoiWgvT5c5PyoauNMo'
+video_id = 'qqG96G8YdcE'
+# video_id_trump_vs_biden = 'qqG96G8YdcE' 
 # video_id_trump_shooting = 'YfvSspaJtk'
 # video_id_biden_speech = 'Z96N57eV1EA'
 url = 'https://www.googleapis.com/youtube/v3/commentThreads'

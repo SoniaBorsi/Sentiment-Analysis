@@ -46,7 +46,43 @@ def extract_features(df):
     # Use textstat's flesch_kincaid_grade function for readability score
     df['Readability'] = df['Comment Content'].apply(lambda x: textstat.flesch_kincaid_grade(x) if len(x) > 0 else 0)
     
+    # Determine the sentiment category for each comment
+    df['Sentiment Category'] = df['Compound'].apply(lambda x: 'Positive' if x > 0 else ('Negative' if x < 0 else 'Neutral'))
+    
+    # Count the number of positive, neutral, and negative comments
+    num_positive = df[df['Sentiment Category'] == 'Positive'].shape[0]
+    num_neutral = df[df['Sentiment Category'] == 'Neutral'].shape[0]
+    num_negative = df[df['Sentiment Category'] == 'Negative'].shape[0]
+
+    # Calculate the percentage of each sentiment category
+    total_comments = len(df)
+    percent_positive = (num_positive / total_comments) * 100 if total_comments > 0 else 0
+    percent_neutral = (num_neutral / total_comments) * 100 if total_comments > 0 else 0
+    percent_negative = (num_negative / total_comments) * 100 if total_comments > 0 else 0
+    
+    # Calculate the average polarity
+    average_polarity = df['Polarity'].mean()
+
+    # Adding results back to the dataframe as columns
+    df['Number of Positive Comments'] = num_positive
+    df['Number of Neutral Comments'] = num_neutral
+    df['Number of Negative Comments'] = num_negative
+    df['Percent Positive Comments'] = percent_positive
+    df['Percent Neutral Comments'] = percent_neutral
+    df['Percent Negative Comments'] = percent_negative
+    df['Average Polarity'] = average_polarity
+    
+    # Optionally, print or return these summary statistics as needed
+    # print(f"Number of Positive Comments: {num_positive}")
+    # print(f"Number of Neutral Comments: {num_neutral}")
+    # print(f"Number of Negative Comments: {num_negative}")
+    # print(f"Percentage of Positive Comments: {percent_positive:.2f}%")
+    # print(f"Percentage of Neutral Comments: {percent_neutral:.2f}%")
+    # print(f"Percentage of Negative Comments: {percent_negative:.2f}%")
+    # print(f"Average Polarity: {average_polarity:.4f}")
+    
     return df
+
 
 def gram_analysis(corpus, gram, n, stopwords_set):
     vectorizer = TfidfVectorizer(stop_words=list(stopwords_set), ngram_range=(gram, gram))
@@ -56,13 +92,17 @@ def gram_analysis(corpus, gram, n, stopwords_set):
     words = sorted(words, key=lambda x: x[1], reverse=True)
     return words[:n]
 
-def plot_ngram(words, title, color):
+def plot_ngram(words, title, color, save_path=None):
     ngram_df = pd.DataFrame(words, columns=["Words", "Counts"])
     ngram_df.groupby("Words").sum()["Counts"].sort_values().plot(kind="barh", color=color, figsize=(10, 5))
     plt.title(title, loc="center", fontsize=15, color="blue", pad=25)
     plt.xlabel("Total Counts", color="magenta", fontsize=10, labelpad=15)
     plt.ylabel("Top Words", color="cyan", fontsize=10, labelpad=15)
-    plt.show()
+    if save_path:
+        plt.savefig(save_path, bbox_inches='tight')
+    plt.close() 
+    # plt.show()
+
 
 def plot_features(df):
     plt.figure(figsize=(15, 5))
@@ -85,15 +125,21 @@ def plot_features(df):
     plt.ylabel('Amount of Comment Content', labelpad=20, color='green')
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig('plots/features_debate.pdf')
+    plt.close() 
 
-def generate_wordcloud(text, stopwords_set, title):
+def generate_wordcloud(text, stopwords_set, title, save_path=None):
+    # Generate the word cloud
     wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(text))
     plt.figure(figsize=(15, 15))
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
     plt.title(title, fontsize=20, color='blue')
-    plt.show()
+    
+    if save_path:
+        plt.savefig(save_path, bbox_inches='tight')
+    plt.close() 
+    # plt.show()
 
 # def display_topics(topics):
 #     for topic, words in topics.items():
@@ -136,7 +182,7 @@ def plot_intertopic_distance(lda_sklearn, n_topics):
     plt.xlabel("PC1")
     plt.ylabel("PC2")
     plt.tight_layout()
-    plt.savefig('plots/intertopic_distance_map.pdf')
+    plt.savefig('plots/intertopic_distance_map_debate.pdf')
     plt.close()
 
 def plot_top_terms(lda_sklearn, vectorizer, dtm, n_topics):
@@ -156,12 +202,12 @@ def plot_top_terms(lda_sklearn, vectorizer, dtm, n_topics):
         ax.set_title(f'Top-30 Most Relevant Terms for Topic {i+1}')
         ax.legend()
         plt.tight_layout()
-        plt.savefig(f'plots/top30_terms_topic_{i+1}.pdf')
+        plt.savefig(f'plots/top30_terms_topic_{i+1}_debate.pdf')
         plt.close(fig)
 
 def visualize_lda(lda_gensim, corpus_gensim, id2word):
     panel = gensimvis.prepare(lda_gensim, corpus_gensim, id2word)
-    pyLDAvis.save_html(panel, 'plots/lda_vis.html')
+    pyLDAvis.save_html(panel, 'plots/lda_vis_debate.html')
     print("LDA visualization saved as 'lda_vis.html'")
 
 
@@ -229,9 +275,10 @@ def topic_modeling(corpus, stopwords_set):
 
 
 def main():
-    df = pd.read_csv('data/processed_comments.csv')
+    df = pd.read_csv('data/processed_comments_debate.csv')
     df['Processed comments'] = df['Processed comments'].astype(str)
     df = extract_features(df)
+    print(df)
     
     try:
         plot_features(df)
@@ -246,24 +293,79 @@ def main():
         negative_reviews = df[df["Polarity"] < -0.05]["Processed comments"].dropna()
 
         positive_unigrams = gram_analysis(positive_reviews, 1, 20, stopwords_set)
-        plot_ngram(positive_unigrams, "Unigram of Reviews with Positive Sentiments", "green")
-
         neutral_unigrams = gram_analysis(neutral_reviews, 1, 20, stopwords_set)
-        plot_ngram(neutral_unigrams, "Unigram of Reviews with Neutral Sentiments", "blue")
-
         negative_unigrams = gram_analysis(negative_reviews, 1, 20, stopwords_set)
-        plot_ngram(negative_unigrams, "Unigram of Reviews with Negative Sentiments", "red")
-    
+
+        # Create a new figure for the subplots
+        plt.figure(figsize=(18, 6))
+        
+        # Plot Positive Unigrams
+        plt.subplot(1, 3, 1)
+        ngram_df = pd.DataFrame(positive_unigrams, columns=["Words", "Counts"])
+        ngram_df.groupby("Words").sum()["Counts"].sort_values().plot(kind="barh", color="green")
+        plt.title("Unigram of Reviews with Positive Sentiments", fontsize=15, color="blue", pad=20)
+        plt.xlabel("Total Counts", color="magenta", fontsize=10, labelpad=10)
+        plt.ylabel("Top Words", color="cyan", fontsize=10, labelpad=10)
+
+        # Plot Neutral Unigrams
+        plt.subplot(1, 3, 2)
+        ngram_df = pd.DataFrame(neutral_unigrams, columns=["Words", "Counts"])
+        ngram_df.groupby("Words").sum()["Counts"].sort_values().plot(kind="barh", color="blue")
+        plt.title("Unigram of Reviews with Neutral Sentiments", fontsize=15, color="blue", pad=20)
+        plt.xlabel("Total Counts", color="magenta", fontsize=10, labelpad=10)
+        plt.ylabel("Top Words", color="cyan", fontsize=10, labelpad=10)
+
+        # Plot Negative Unigrams
+        plt.subplot(1, 3, 3)
+        ngram_df = pd.DataFrame(negative_unigrams, columns=["Words", "Counts"])
+        ngram_df.groupby("Words").sum()["Counts"].sort_values().plot(kind="barh", color="red")
+        plt.title("Unigram of Reviews with Negative Sentiments", fontsize=15, color="blue", pad=20)
+        plt.xlabel("Total Counts", color="magenta", fontsize=10, labelpad=10)
+        plt.ylabel("Top Words", color="cyan", fontsize=10, labelpad=10)
+
+        # Adjust layout and save the combined figure
+        plt.tight_layout()
+        plt.savefig('plots/unigrams_debate.pdf')
+        plt.close()
+        #plt.show()
+
     except Exception as e:
         print(f"Error during N-gram analysis: {e}")
+
     
     try:
-        generate_wordcloud(positive_reviews, stopwords_set, "WordCloud of Positive Reviews")
-        generate_wordcloud(neutral_reviews, stopwords_set, "WordCloud of Neutral Reviews")
-        generate_wordcloud(negative_reviews, stopwords_set, "WordCloud of Negative Reviews")
-    
+        # Create a new figure for the subplots
+        plt.figure(figsize=(18, 6))
+
+        # Plot Word Cloud for Positive Reviews
+        plt.subplot(1, 3, 1)
+        wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(positive_reviews))
+        plt.imshow(wordcloud, interpolation="bilinear")
+        plt.axis("off")
+        plt.title("WordCloud of Positive Reviews", fontsize=15, color="blue", pad=20)
+
+        # Plot Word Cloud for Neutral Reviews
+        plt.subplot(1, 3, 2)
+        wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(neutral_reviews))
+        plt.imshow(wordcloud, interpolation="bilinear")
+        plt.axis("off")
+        plt.title("WordCloud of Neutral Reviews", fontsize=15, color="blue", pad=20)
+
+        # Plot Word Cloud for Negative Reviews
+        plt.subplot(1, 3, 3)
+        wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(negative_reviews))
+        plt.imshow(wordcloud, interpolation="bilinear")
+        plt.axis("off")
+        plt.title("WordCloud of Negative Reviews", fontsize=15, color="blue", pad=20)
+
+        # Adjust layout and save the combined figure
+        plt.tight_layout()
+        plt.savefig("plots/wordclouds_debate.png")
+        plt.close()
+        #plt.show()
+
     except Exception as e:
-        print(f"Error generating WordCloud: {e}")
+        print(f"Error generating WordClouds: {e}")
     
     try:
         print("\nPerforming Topic Modeling...")
@@ -272,7 +374,6 @@ def main():
     
     except Exception as e:
         print(f"Error during Topic Modeling: {e}")
-
 
 if __name__ == "__main__":
     main()
