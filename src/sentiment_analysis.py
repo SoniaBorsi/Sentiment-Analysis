@@ -21,7 +21,7 @@ import gensim
 import random
 import logging
 
-random.seed(42) 
+random.seed(1) 
 
 def analyze_sentiment(text):
     sia = SentimentIntensityAnalyzer()
@@ -125,7 +125,7 @@ def plot_features(df):
     plt.ylabel('Amount of Comment Content', labelpad=20, color='green')
 
     plt.tight_layout()
-    plt.savefig('plots/features_debate.pdf')
+    plt.savefig('plots/features_2020.pdf')
     plt.close() 
 
 def generate_wordcloud(text, stopwords_set, title, save_path=None):
@@ -182,7 +182,7 @@ def plot_intertopic_distance(lda_sklearn, n_topics):
     plt.xlabel("PC1")
     plt.ylabel("PC2")
     plt.tight_layout()
-    plt.savefig('plots/intertopic_distance_map_debate.pdf')
+    plt.savefig('plots/intertopic_distance_map_2020.pdf')
     plt.close()
 
 def plot_top_terms(lda_sklearn, vectorizer, dtm, n_topics):
@@ -202,71 +202,72 @@ def plot_top_terms(lda_sklearn, vectorizer, dtm, n_topics):
         ax.set_title(f'Top-30 Most Relevant Terms for Topic {i+1}')
         ax.legend()
         plt.tight_layout()
-        plt.savefig(f'plots/top30_terms_topic_{i+1}_debate.pdf')
+        plt.savefig(f'plots/top30_terms_topic_{i+1}_20240.pdf')
         plt.close(fig)
 
 def visualize_lda(lda_gensim, corpus_gensim, id2word):
     panel = gensimvis.prepare(lda_gensim, corpus_gensim, id2word)
-    pyLDAvis.save_html(panel, 'plots/lda_vis_debate.html')
+    pyLDAvis.save_html(panel, 'plots/lda_vis_2020.html')
     print("LDA visualization saved as 'lda_vis.html'")
 
 
-def find_optimal_number_of_topics(corpus, stopwords_set, start=2, end=3, step=1):
+# def find_optimal_number_of_topics(corpus, stopwords_set, start=2, end=3, step=1):
+#     dtm, vectorizer = vectorize_corpus(corpus, stopwords_set)
+    
+#     coherence_values = []
+#     model_list = []
+    
+#     for n_topics in range(start, end, step):
+#         lda_gensim, id2word, corpus_gensim = fit_lda_gensim(dtm, vectorizer, n_topics)
+#         coherence = compute_coherence(lda_gensim, corpus_gensim, id2word, corpus)
+#         coherence_values.append(coherence)
+#         model_list.append((lda_gensim, id2word, corpus_gensim))
+#         print(f"Number of topics: {n_topics}, Coherence Score: {coherence}")
+    
+#     # Plot coherence score against the number of topics
+#     # plt.figure(figsize=(10, 7))
+#     # plt.plot(range(start, end, step), coherence_values)
+#     # plt.xlabel("Number of Topics")
+#     # plt.ylabel("Coherence Score")
+#     # plt.title("Coherence Score by Number of Topics")
+#     # plt.grid(True)
+#     # plt.savefig('plots/coherence_scores.png')
+#     # plt.close()
+    
+#     # Find the optimal number of topics
+#     optimal_index = coherence_values.index(max(coherence_values))
+#     optimal_n_topics = range(start, end, step)[optimal_index]
+#     print(f"Optimal number of topics: {optimal_n_topics} with Coherence Score: {coherence_values[optimal_index]}")
+    
+#     # Return the optimal model and its components
+#     optimal_model, id2word, corpus_gensim = model_list[optimal_index]
+#     return optimal_n_topics, optimal_model, id2word, corpus_gensim
+
+
+
+def topic_modeling(corpus, stopwords_set, n_topics):
+    
+    # Fit the LDA model with Gensim
     dtm, vectorizer = vectorize_corpus(corpus, stopwords_set)
+    lda_gensim, id2word, corpus_gensim = fit_lda_gensim(dtm, vectorizer, n_topics)
     
-    coherence_values = []
-    model_list = []
+    # Fit the LDA model with sklearn (optional)
+    lda_sklearn = fit_lda_sklearn(dtm, n_topics)
     
-    for n_topics in range(start, end, step):
-        lda_gensim, id2word, corpus_gensim = fit_lda_gensim(dtm, vectorizer, n_topics)
-        coherence = compute_coherence(lda_gensim, corpus_gensim, id2word, corpus)
-        coherence_values.append(coherence)
-        model_list.append((lda_gensim, id2word, corpus_gensim))
-        print(f"Number of topics: {n_topics}, Coherence Score: {coherence}")
-    
-    # Plot coherence score against the number of topics
-    # plt.figure(figsize=(10, 7))
-    # plt.plot(range(start, end, step), coherence_values)
-    # plt.xlabel("Number of Topics")
-    # plt.ylabel("Coherence Score")
-    # plt.title("Coherence Score by Number of Topics")
-    # plt.grid(True)
-    # plt.savefig('plots/coherence_scores.png')
-    # plt.close()
-    
-    # Find the optimal number of topics
-    optimal_index = coherence_values.index(max(coherence_values))
-    optimal_n_topics = range(start, end, step)[optimal_index]
-    print(f"Optimal number of topics: {optimal_n_topics} with Coherence Score: {coherence_values[optimal_index]}")
-    
-    # Return the optimal model and its components
-    optimal_model, id2word, corpus_gensim = model_list[optimal_index]
-    return optimal_n_topics, optimal_model, id2word, corpus_gensim
-
-
-
-def topic_modeling(corpus, stopwords_set):
-    # Find the optimal number of topics
-    optimal_n_topics, lda_gensim, id2word, corpus_gensim = find_optimal_number_of_topics(corpus, stopwords_set)
-    
-    # Fit the optimal LDA model with sklearn (optional)
-    dtm, vectorizer = vectorize_corpus(corpus, stopwords_set)
-    lda_sklearn = fit_lda_sklearn(dtm, optimal_n_topics)
-    
-    # Calculate coherence for the optimal number of topics
+    # Calculate coherence for the manually set number of topics
     coherence_lda = compute_coherence(lda_gensim, corpus_gensim, id2word, corpus)
-    print(f'Coherence Score for optimal model: {coherence_lda}')
+    print(f'Coherence Score for the model with {n_topics} topics: {coherence_lda}')
     
     try:
-        # Visualize the optimal LDA model
+        # Visualize the LDA model
         visualize_lda(lda_gensim, corpus_gensim, id2word)
-        plot_intertopic_distance(lda_sklearn, optimal_n_topics)
-        plot_top_terms(lda_sklearn, vectorizer, dtm, optimal_n_topics)
+        plot_intertopic_distance(lda_sklearn, n_topics)
+        plot_top_terms(lda_sklearn, vectorizer, dtm, n_topics)
         
     except Exception as e:
         print(f"Error during visualization: {e}")
     
-    # Extract topics from the optimal model
+    # Extract topics from the LDA model
     topics = {}
     for index, topic in enumerate(lda_sklearn.components_):
         topics[f"Topic {index+1}"] = {vectorizer.get_feature_names_out()[i]: topic[i] for i in topic.argsort()[-10:]}
@@ -274,8 +275,9 @@ def topic_modeling(corpus, stopwords_set):
     return topics
 
 
+
 def main():
-    df = pd.read_csv('data/processed_comments_debate.csv')
+    df = pd.read_csv('data/processed_comments_2020.csv')
     df['Processed comments'] = df['Processed comments'].astype(str)
     df = extract_features(df)
     print(df)
@@ -288,13 +290,13 @@ def main():
     stopwords_set = set(stopwords.words("english")) - set(["not"])
     
     try:
-        positive_reviews = df[df["Polarity"] > 0.05]["Processed comments"].dropna()
-        neutral_reviews = df[(df["Polarity"] >= -0.05) & (df["Polarity"] <= 0.05)]["Processed comments"].dropna()
-        negative_reviews = df[df["Polarity"] < -0.05]["Processed comments"].dropna()
+        positive_comments = df[df["Polarity"] > 0.05]["Processed comments"].dropna()
+        neutral_comments = df[(df["Polarity"] >= -0.05) & (df["Polarity"] <= 0.05)]["Processed comments"].dropna()
+        negative_comments = df[df["Polarity"] < -0.05]["Processed comments"].dropna()
 
-        positive_unigrams = gram_analysis(positive_reviews, 1, 20, stopwords_set)
-        neutral_unigrams = gram_analysis(neutral_reviews, 1, 20, stopwords_set)
-        negative_unigrams = gram_analysis(negative_reviews, 1, 20, stopwords_set)
+        positive_unigrams = gram_analysis(positive_comments, 1, 20, stopwords_set)
+        neutral_unigrams = gram_analysis(neutral_comments, 1, 20, stopwords_set)
+        negative_unigrams = gram_analysis(negative_comments, 1, 20, stopwords_set)
 
         # Create a new figure for the subplots
         plt.figure(figsize=(18, 6))
@@ -303,7 +305,7 @@ def main():
         plt.subplot(1, 3, 1)
         ngram_df = pd.DataFrame(positive_unigrams, columns=["Words", "Counts"])
         ngram_df.groupby("Words").sum()["Counts"].sort_values().plot(kind="barh", color="green")
-        plt.title("Unigram of Reviews with Positive Sentiments", fontsize=15, color="blue", pad=20)
+        plt.title("Unigram of Comments with Positive Sentiments", fontsize=15, color="blue", pad=20)
         plt.xlabel("Total Counts", color="magenta", fontsize=10, labelpad=10)
         plt.ylabel("Top Words", color="cyan", fontsize=10, labelpad=10)
 
@@ -311,7 +313,7 @@ def main():
         plt.subplot(1, 3, 2)
         ngram_df = pd.DataFrame(neutral_unigrams, columns=["Words", "Counts"])
         ngram_df.groupby("Words").sum()["Counts"].sort_values().plot(kind="barh", color="blue")
-        plt.title("Unigram of Reviews with Neutral Sentiments", fontsize=15, color="blue", pad=20)
+        plt.title("Unigram of Comments with Neutral Sentiments", fontsize=15, color="blue", pad=20)
         plt.xlabel("Total Counts", color="magenta", fontsize=10, labelpad=10)
         plt.ylabel("Top Words", color="cyan", fontsize=10, labelpad=10)
 
@@ -319,13 +321,13 @@ def main():
         plt.subplot(1, 3, 3)
         ngram_df = pd.DataFrame(negative_unigrams, columns=["Words", "Counts"])
         ngram_df.groupby("Words").sum()["Counts"].sort_values().plot(kind="barh", color="red")
-        plt.title("Unigram of Reviews with Negative Sentiments", fontsize=15, color="blue", pad=20)
+        plt.title("Unigram of Comments with Negative Sentiments", fontsize=15, color="blue", pad=20)
         plt.xlabel("Total Counts", color="magenta", fontsize=10, labelpad=10)
         plt.ylabel("Top Words", color="cyan", fontsize=10, labelpad=10)
 
         # Adjust layout and save the combined figure
         plt.tight_layout()
-        plt.savefig('plots/unigrams_debate.pdf')
+        plt.savefig('plots/unigrams_2020.pdf')
         plt.close()
         #plt.show()
 
@@ -339,28 +341,28 @@ def main():
 
         # Plot Word Cloud for Positive Reviews
         plt.subplot(1, 3, 1)
-        wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(positive_reviews))
+        wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(positive_comments))
         plt.imshow(wordcloud, interpolation="bilinear")
         plt.axis("off")
         plt.title("WordCloud of Positive Reviews", fontsize=15, color="blue", pad=20)
 
         # Plot Word Cloud for Neutral Reviews
         plt.subplot(1, 3, 2)
-        wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(neutral_reviews))
+        wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(neutral_comments))
         plt.imshow(wordcloud, interpolation="bilinear")
         plt.axis("off")
         plt.title("WordCloud of Neutral Reviews", fontsize=15, color="blue", pad=20)
 
         # Plot Word Cloud for Negative Reviews
         plt.subplot(1, 3, 3)
-        wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(negative_reviews))
+        wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(negative_comments))
         plt.imshow(wordcloud, interpolation="bilinear")
         plt.axis("off")
         plt.title("WordCloud of Negative Reviews", fontsize=15, color="blue", pad=20)
 
         # Adjust layout and save the combined figure
         plt.tight_layout()
-        plt.savefig("plots/wordclouds_debate.png")
+        plt.savefig("plots/wordclouds_2020.png")
         plt.close()
         #plt.show()
 
@@ -369,11 +371,9 @@ def main():
     
     try:
         print("\nPerforming Topic Modeling...")
-        topic_modeling(df['Processed comments'], stopwords_set)
+        topic_modeling(df['Processed comments'], stopwords_set, 2)
         #display_topics(topics)
     
     except Exception as e:
         print(f"Error during Topic Modeling: {e}")
 
-if __name__ == "__main__":
-    main()

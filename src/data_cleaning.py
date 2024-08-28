@@ -14,8 +14,8 @@ import contractions
 # nltk.download('wordnet')
 # nltk.download('stopwords')
 
-# Define text cleaning function with emoji removal
-# Enhanced text cleaning function
+
+# text cleaning function
 def text_cleaning(text):
     text = text.lower()  # Convert to lowercase
     
@@ -43,10 +43,16 @@ def text_cleaning(text):
     
     # Replace multiple spaces with a single space
     text = re.sub(r'\s+', ' ', text).strip()
+
+    # Remove the word "not"
+    # text = re.sub(r'\bnot\b', '', text)
+
+    # # Remove the word "like"
+    # text = re.sub(r'\blike\b', '', text)
     
     return text
 
-# Enhanced text processing function
+# text processing function
 def text_processing(text):
     stopwords_set = set(stopwords.words("english")) - set(["not"])  # Define stopwords set
     lemmatizer = WordNetLemmatizer()  # Initialize lemmatizer
@@ -65,7 +71,7 @@ def preprocess_text(text):
 
 def main():
     # Load the dataset
-    df = pd.read_csv('data/comments_debate.csv')
+    df = pd.read_csv('data/comments_2020.csv')
     
     # Preprocess the data
     df['Processed comments'] = df['Comment Content'].apply(preprocess_text)
@@ -79,9 +85,5 @@ def main():
     print("Sample of processed comments:", df['Processed comments'].head(10))
     
     # Save the preprocessed data to a new CSV file
-    df.to_csv('data/processed_comments_debate.csv', index=False)
-    print("Data preprocessing completed and saved to 'processed_comments_debate.csv'.")
-
-# Execute the main function
-if __name__ == "__main__":
-    main()
+    df.to_csv('data/processed_comments_2020.csv', index=False)
+    print("Data preprocessing completed and saved to 'processed_comments_2020.csv'.")
