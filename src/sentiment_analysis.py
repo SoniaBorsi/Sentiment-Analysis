@@ -70,14 +70,14 @@ def extract_features(df):
     df['Percent Negative Comments'] = percent_negative
     df['Average Polarity'] = average_polarity
     
-    # Optionally, print or return these summary statistics as needed
-    # print(f"Number of Positive Comments: {num_positive}")
-    # print(f"Number of Neutral Comments: {num_neutral}")
-    # print(f"Number of Negative Comments: {num_negative}")
-    # print(f"Percentage of Positive Comments: {percent_positive:.2f}%")
-    # print(f"Percentage of Neutral Comments: {percent_neutral:.2f}%")
-    # print(f"Percentage of Negative Comments: {percent_negative:.2f}%")
-    # print(f"Average Polarity: {average_polarity:.4f}")
+    #Optionally, print or return these summary statistics as needed
+    print(f"Number of Positive Comments: {num_positive}")
+    print(f"Number of Neutral Comments: {num_neutral}")
+    print(f"Number of Negative Comments: {num_negative}")
+    print(f"Percentage of Positive Comments: {percent_positive:.2f}%")
+    print(f"Percentage of Neutral Comments: {percent_neutral:.2f}%")
+    print(f"Percentage of Negative Comments: {percent_negative:.2f}%")
+    print(f"Average Polarity: {average_polarity:.4f}")
     
     return df
 
@@ -123,7 +123,7 @@ def plot_features(df):
     plt.ylabel('Amount of Comment Content', labelpad=20, color='green')
 
     plt.tight_layout()
-    plt.savefig('plots/features_2020.pdf')
+    plt.savefig('plots/features_k.pdf')
     plt.close() 
 
 def generate_wordcloud(text, stopwords_set, title, save_path=None):
@@ -180,7 +180,7 @@ def plot_intertopic_distance(lda_sklearn, n_topics):
     plt.xlabel("PC1")
     plt.ylabel("PC2")
     plt.tight_layout()
-    plt.savefig('plots/intertopic_distance_map_2020.pdf')
+    plt.savefig('plots/intertopic_distance_map_k.pdf')
     plt.close()
 
 def plot_top_terms(lda_sklearn, vectorizer, dtm, n_topics):
@@ -200,12 +200,12 @@ def plot_top_terms(lda_sklearn, vectorizer, dtm, n_topics):
         ax.set_title(f'Top-30 Most Relevant Terms for Topic {i+1}')
         ax.legend()
         plt.tight_layout()
-        plt.savefig(f'plots/top30_terms_topic_{i+1}_2020.pdf')
+        plt.savefig(f'plots/top30_terms_topic_{i+1}_k.pdf')
         plt.close(fig)
 
 def visualize_lda(lda_gensim, corpus_gensim, id2word):
     panel = gensimvis.prepare(lda_gensim, corpus_gensim, id2word)
-    pyLDAvis.save_html(panel, 'plots/lda_vis_2020.html')
+    pyLDAvis.save_html(panel, 'plots/lda_vis_k.html')
     print("LDA visualization saved as 'lda_vis.html'")
 
 
@@ -275,7 +275,7 @@ def topic_modeling(corpus, stopwords_set, n_topics):
 
 
 def main():
-    df = pd.read_csv('data/processed_comments_2020.csv')
+    df = pd.read_csv('data/processed_comments_k.csv')
     df['Processed comments'] = df['Processed comments'].astype(str)
     df = extract_features(df)
     print(df)
@@ -325,7 +325,7 @@ def main():
 
         # Adjust layout and save the combined figure
         plt.tight_layout()
-        plt.savefig('plots/unigrams_2020.pdf')
+        plt.savefig('plots/unigrams_k.pdf')
         plt.close()
         #plt.show()
 
@@ -360,7 +360,7 @@ def main():
 
         # Adjust layout and save the combined figure
         plt.tight_layout()
-        plt.savefig("plots/wordclouds_2020.png")
+        plt.savefig("plots/wordclouds_k.png")
         plt.close()
         #plt.show()
 

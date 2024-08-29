@@ -46,7 +46,7 @@ def text_cleaning(text):
     text = re.sub(r'\s+', ' ', text).strip()
 
 
-    irrelevant_words = ['padang', 'kadang', 'Kadang', 'nawi', 'not']  # Example list
+    irrelevant_words = ['padang', 'kadang', 'Kadang', 'nawi', 'not', 'woooooo', 'like', '']  
     for word in irrelevant_words:
         text = re.sub(r'\b' + word + r'\b', '', text)
     
@@ -74,7 +74,7 @@ def preprocess_text(text):
 
 def main():
     # Load the dataset
-    df = pd.read_csv('data/comments_2020.csv')
+    df = pd.read_csv('data/comments_k.csv')
     
     # Preprocess the data
     df['Processed comments'] = df['Comment Content'].apply(preprocess_text)
@@ -88,5 +88,5 @@ def main():
     print("Sample of processed comments:", df['Processed comments'].head(10))
     
     # Save the preprocessed data to a new CSV file
-    df.to_csv('data/processed_comments_2020.csv', index=False)
-    print("Data preprocessing completed and saved to 'processed_comments_2020.csv'.")
+    df.to_csv('data/processed_comments_k.csv', index=False)
+    print("Data preprocessing completed and saved to 'processed_comments_k.csv'.")
