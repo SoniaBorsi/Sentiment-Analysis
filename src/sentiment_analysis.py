@@ -209,40 +209,6 @@ def visualize_lda(lda_gensim, corpus_gensim, id2word):
     print("LDA visualization saved as 'lda_vis.html'")
 
 
-# def find_optimal_number_of_topics(corpus, stopwords_set, start=2, end=3, step=1):
-#     dtm, vectorizer = vectorize_corpus(corpus, stopwords_set)
-    
-#     coherence_values = []
-#     model_list = []
-    
-#     for n_topics in range(start, end, step):
-#         lda_gensim, id2word, corpus_gensim = fit_lda_gensim(dtm, vectorizer, n_topics)
-#         coherence = compute_coherence(lda_gensim, corpus_gensim, id2word, corpus)
-#         coherence_values.append(coherence)
-#         model_list.append((lda_gensim, id2word, corpus_gensim))
-#         print(f"Number of topics: {n_topics}, Coherence Score: {coherence}")
-    
-#     # Plot coherence score against the number of topics
-#     # plt.figure(figsize=(10, 7))
-#     # plt.plot(range(start, end, step), coherence_values)
-#     # plt.xlabel("Number of Topics")
-#     # plt.ylabel("Coherence Score")
-#     # plt.title("Coherence Score by Number of Topics")
-#     # plt.grid(True)
-#     # plt.savefig('plots/coherence_scores.png')
-#     # plt.close()
-    
-#     # Find the optimal number of topics
-#     optimal_index = coherence_values.index(max(coherence_values))
-#     optimal_n_topics = range(start, end, step)[optimal_index]
-#     print(f"Optimal number of topics: {optimal_n_topics} with Coherence Score: {coherence_values[optimal_index]}")
-    
-#     # Return the optimal model and its components
-#     optimal_model, id2word, corpus_gensim = model_list[optimal_index]
-#     return optimal_n_topics, optimal_model, id2word, corpus_gensim
-
-
-
 def topic_modeling(corpus, stopwords_set, n_topics):
     
     # Fit the LDA model with Gensim
