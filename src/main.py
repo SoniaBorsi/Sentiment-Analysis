@@ -3,6 +3,7 @@ import os
 from data_fetching import fetch_comments
 from data_cleaning import main as data_cleaning_main
 from sentiment_analysis import main as sentiment_analysis_main
+import random
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -32,7 +33,7 @@ if __name__ == "__main__":
     if not os.path.exists('data'):
         os.makedirs('data')
 
-    run_data_fetching()
+    #run_data_fetching()
     run_data_cleaning()
     run_sentiment_analysis()
 

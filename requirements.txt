@@ -1,0 +1,13 @@
+pandas
+nltk
+beautifulsoup4
+contractions
+scikit-learn
+gensim
+pyLDAvis
+matplotlib
+wordcloud
+vaderSentiment
+textstat
+numpy
+requests

@@ -15,13 +15,11 @@ from sklearn.decomposition import PCA
 import numpy as np
 import pyLDAvis.gensim_models as gensimvis
 from sklearn.feature_extraction.text import CountVectorizer
-from gensim.models.coherencemodel import CoherenceModel
 from gensim.corpora.dictionary import Dictionary
 import gensim
 import random
 import logging
 
-random.seed(1) 
 
 def analyze_sentiment(text):
     sia = SentimentIntensityAnalyzer()
@@ -108,7 +106,7 @@ def plot_features(df):
     plt.figure(figsize=(15, 5))
     plt.subplot(1, 3, 1)
     df['Polarity'].plot(kind='hist', bins=40, edgecolor='blue', linewidth=1, color='orange')
-    plt.title('Polarity Score in Reviews', color='blue', pad=20)
+    plt.title('Polarity Score in Comments', color='blue', pad=20)
     plt.xlabel('Polarity', labelpad=15, color='red')
     plt.ylabel('Amount of Comment Content', labelpad=20, color='green')
 
@@ -202,7 +200,7 @@ def plot_top_terms(lda_sklearn, vectorizer, dtm, n_topics):
         ax.set_title(f'Top-30 Most Relevant Terms for Topic {i+1}')
         ax.legend()
         plt.tight_layout()
-        plt.savefig(f'plots/top30_terms_topic_{i+1}_20240.pdf')
+        plt.savefig(f'plots/top30_terms_topic_{i+1}_2020.pdf')
         plt.close(fig)
 
 def visualize_lda(lda_gensim, corpus_gensim, id2word):
@@ -344,21 +342,21 @@ def main():
         wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(positive_comments))
         plt.imshow(wordcloud, interpolation="bilinear")
         plt.axis("off")
-        plt.title("WordCloud of Positive Reviews", fontsize=15, color="blue", pad=20)
+        plt.title("WordCloud of Positive Comments", fontsize=15, color="blue", pad=20)
 
         # Plot Word Cloud for Neutral Reviews
         plt.subplot(1, 3, 2)
         wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(neutral_comments))
         plt.imshow(wordcloud, interpolation="bilinear")
         plt.axis("off")
-        plt.title("WordCloud of Neutral Reviews", fontsize=15, color="blue", pad=20)
+        plt.title("WordCloud of Neutral Comments", fontsize=15, color="blue", pad=20)
 
         # Plot Word Cloud for Negative Reviews
         plt.subplot(1, 3, 3)
         wordcloud = WordCloud(max_words=50, width=3000, height=1500, stopwords=stopwords_set).generate(str(negative_comments))
         plt.imshow(wordcloud, interpolation="bilinear")
         plt.axis("off")
-        plt.title("WordCloud of Negative Reviews", fontsize=15, color="blue", pad=20)
+        plt.title("WordCloud of Negative Comments", fontsize=15, color="blue", pad=20)
 
         # Adjust layout and save the combined figure
         plt.tight_layout()

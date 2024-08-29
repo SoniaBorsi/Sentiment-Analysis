@@ -3,8 +3,8 @@ import csv
 import time
 
 
-api_key = 'your API key'
-video_id = 'wW1lY5jFNcQ'
+api_key = 'AIzaSyAwHjR8O6X0Q3wEpzoiWgvT5c5PyoauNMo'
+video_id = 'qqG96G8YdcE'
 # video_id_trump_vs_biden_2024 = 'qqG96G8YdcE' 
 # video_id_trump_vs_biden_2020 = 'wW1lY5jFNcQ'
 

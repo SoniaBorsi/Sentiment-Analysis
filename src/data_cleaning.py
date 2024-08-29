@@ -15,6 +15,7 @@ import contractions
 # nltk.download('stopwords')
 
 
+
 # text cleaning function
 def text_cleaning(text):
     text = text.lower()  # Convert to lowercase
@@ -44,17 +45,19 @@ def text_cleaning(text):
     # Replace multiple spaces with a single space
     text = re.sub(r'\s+', ' ', text).strip()
 
-    # Remove the word "not"
-    # text = re.sub(r'\bnot\b', '', text)
 
-    # # Remove the word "like"
-    # text = re.sub(r'\blike\b', '', text)
+    irrelevant_words = ['padang', 'kadang', 'Kadang', 'nawi', 'not']  # Example list
+    for word in irrelevant_words:
+        text = re.sub(r'\b' + word + r'\b', '', text)
     
     return text
 
 # text processing function
 def text_processing(text):
-    stopwords_set = set(stopwords.words("english")) - set(["not"])  # Define stopwords set
+    irrelevant_words = {'padang', 'kadang', 'nawi'}
+    stopwords_set = set(stopwords.words("english")) - set(["not"])  # Keep "not"
+    stopwords_set.update(irrelevant_words)  # Add irrelevant words to the stopwords set
+    
     lemmatizer = WordNetLemmatizer()  # Initialize lemmatizer
     tokens = word_tokenize(text)  # Tokenize text
     
