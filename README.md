@@ -49,13 +49,14 @@ To get started with the project, follow these steps:
 ## Methodology
 
 The analysis consists of two main phases:
-1. Sentiment Analysis: We use VADER (Valence Aware Dictionary and Sentiment Reasoner), a tool specifically built to handle social media data, for sentiment scoring. VADER provides a compound sentiment score for each comment, as well as individual positive, neutral, and negative scores. This enables us to classify the comments based on their overall sentiment and observe the trends across the two political videos.
+1. Sentiment analysis: For sentiment scoring, we use VADER (Valence Aware Dictionary and Sentiment Reasoner), a tool specifically designed to handle social media data. VADER provides a composite sentiment score for each comment, as well as individual positive, neutral and negative scores. This allows us to classify the comments based on their overall sentiment and observe the trends across the two political videos.
 2. Topic Modeling: Latent Dirichlet Allocation (LDA) is applied to identify the key topics in the comments. The text is vectorized using Term Frequency-Inverse Document Frequency (TF-IDF), and LDA is used to uncover the most prominent topics in the discussions around the candidates.
 
 ## Results 
-The sentiment analysis revealed key differences between the two videos:
-Trump vs. Biden (2024 Debate): A more polarized sentiment distribution with a balanced number of positive, neutral, and negative comments.
-Kamala Harris vs. Trump (Expert Discussion): A higher proportion of positive comments, indicating a more favorable reception of Kamala Harris as compared to the Trump vs. Biden debate.
-Topic modeling further highlighted significant themes around leadership, national identity, and policy in both videos.
+Sentiment analysis revealed key differences between the two videos:
+- Trump vs. Biden (2024 Debate): A more polarised sentiment distribution with a balanced number of positive, neutral and negative comments.
+- 
+- Kamala Harris vs. Trump (Expert Discussion): A higher proportion of positive comments, indicating a more favourable reception of Kamala Harris compared to the Trump vs. Biden debate.
+Topic modelling also highlighted significant themes around leadership, national identity and politics in both videos.
 
 ## Author
