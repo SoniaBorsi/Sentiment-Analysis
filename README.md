@@ -1,4 +1,4 @@
-# Tracking Public Opinion: Sentiment Analysis of YouTube Comments on Biden-Trump 2024 Campaign Events
+# Analyzing Public Opinion on YouTube: A Comparative Study of Trump vs. Biden and Trump vs. Harris
 
 Clone the repository and run the main script:
 ```bash
