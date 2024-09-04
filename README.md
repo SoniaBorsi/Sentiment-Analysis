@@ -37,14 +37,14 @@ To get started with the project, follow these steps:
 
 2. **Install the requirements**:
     
-```
- pip install requirements.txt
-```
+    ```
+     pip install requirements.txt
+    ```
 
 3. **Run the script**:
-```
-python3 src/main.py
-```
+    ```
+    python3 src/main.py
+    ```
 
 ## Methodology
 
