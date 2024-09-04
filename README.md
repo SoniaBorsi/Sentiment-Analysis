@@ -77,5 +77,7 @@ Topic modelling also highlighted significant themes around leadership, national 
   <sub><em>Wordcloud Harris vs Trump discussion.</em></sub>
 </p>
 
+For more details about the methods used and the results, please consult the [paper]().
 
 ## Author
+[Sonia Borsi](https://github.com/SoniaBorsi)
