@@ -55,8 +55,27 @@ The analysis consists of two main phases:
 ## Results 
 Sentiment analysis revealed key differences between the two videos:
 - Trump vs. Biden (2024 Debate): A more polarised sentiment distribution with a balanced number of positive, neutral and negative comments.
-- 
+<br>
+
+<p align="center">
+  <img src="https://github.com/SoniaBorsi/Sentiment-Analysis/blob/dc596c05783f42a2be0fc504e01c98a8bfb22ed4/plots/wordclouds_2024.png?raw=true" width="512"/>  
+</p>
+
+<p align="center">
+  <sub><em>Wordcloud Biden vs Trump debate.</em></sub>
+</p>
+
 - Kamala Harris vs. Trump (Expert Discussion): A higher proportion of positive comments, indicating a more favourable reception of Kamala Harris compared to the Trump vs. Biden debate.
 Topic modelling also highlighted significant themes around leadership, national identity and politics in both videos.
+<br>
+
+<p align="center">
+  <img src="https://github.com/SoniaBorsi/Sentiment-Analysis/blob/dc596c05783f42a2be0fc504e01c98a8bfb22ed4/plots/wordclouds_k.png?raw=true" width="512"/>  
+</p>
+
+<p align="center">
+  <sub><em>Wordcloud Harris vs Trump discussion.</em></sub>
+</p>
+
 
 ## Author
