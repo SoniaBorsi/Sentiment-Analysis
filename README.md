@@ -45,6 +45,9 @@ To get started with the project, follow these steps:
     ```
     python3 src/main.py
     ```
+> [!TIP]
+> To download data from both videos, change the video id in the data_fetching script and add your YouTube API key; also remember to rename the name of the files you want to download in the script.
+
 
 ## Methodology
 
