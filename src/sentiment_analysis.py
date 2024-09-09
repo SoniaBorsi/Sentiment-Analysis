@@ -209,8 +209,36 @@ def visualize_lda(lda_gensim, corpus_gensim, id2word):
     print("LDA visualization saved as 'lda_vis.html'")
 
 
-def topic_modeling(corpus, stopwords_set, n_topics):
+# def topic_modeling(corpus, stopwords_set, n_topics):
     
+#     # Fit the LDA model with Gensim
+#     dtm, vectorizer = vectorize_corpus(corpus, stopwords_set)
+#     lda_gensim, id2word, corpus_gensim = fit_lda_gensim(dtm, vectorizer, n_topics)
+    
+#     # Fit the LDA model with sklearn (optional)
+#     lda_sklearn = fit_lda_sklearn(dtm, n_topics)
+    
+#     # Calculate coherence for the manually set number of topics
+#     coherence_lda = compute_coherence(lda_gensim, corpus_gensim, id2word, corpus)
+#     print(f'Coherence Score for the model with {n_topics} topics: {coherence_lda}')
+    
+#     try:
+#         # Visualize the LDA model
+#         visualize_lda(lda_gensim, corpus_gensim, id2word)
+#         plot_intertopic_distance(lda_sklearn, n_topics)
+#         plot_top_terms(lda_sklearn, vectorizer, dtm, n_topics)
+        
+#     except Exception as e:
+#         print(f"Error during visualization: {e}")
+    
+#     # Extract topics from the LDA model
+#     topics = {}
+#     for index, topic in enumerate(lda_sklearn.components_):
+#         topics[f"Topic {index+1}"] = {vectorizer.get_feature_names_out()[i]: topic[i] for i in topic.argsort()[-10:]}
+    
+#     return topics
+
+def topic_modeling(corpus, stopwords_set, n_topics):
     # Fit the LDA model with Gensim
     dtm, vectorizer = vectorize_corpus(corpus, stopwords_set)
     lda_gensim, id2word, corpus_gensim = fit_lda_gensim(dtm, vectorizer, n_topics)
@@ -227,7 +255,6 @@ def topic_modeling(corpus, stopwords_set, n_topics):
         visualize_lda(lda_gensim, corpus_gensim, id2word)
         plot_intertopic_distance(lda_sklearn, n_topics)
         plot_top_terms(lda_sklearn, vectorizer, dtm, n_topics)
-        
     except Exception as e:
         print(f"Error during visualization: {e}")
     
@@ -236,6 +263,12 @@ def topic_modeling(corpus, stopwords_set, n_topics):
     for index, topic in enumerate(lda_sklearn.components_):
         topics[f"Topic {index+1}"] = {vectorizer.get_feature_names_out()[i]: topic[i] for i in topic.argsort()[-10:]}
     
+    # Print words and weights for each topic
+    for topic_num, topic_words in topics.items():
+        print(f"\n{topic_num}:")
+        for word, weight in topic_words.items():
+            print(f"{word}: {weight:.4f}")
+
     return topics
 
 

@@ -18,8 +18,8 @@ def save_comments_to_csv(comments, filename):
 def run_data_fetching():
     print("Running data fetching...")
     comments = fetch_comments(limit= 5000)
-    save_comments_to_csv(comments, 'data/comments_k.csv')
-    print(f"Saved {len(comments)} comments to data/comments_k.csv")
+    save_comments_to_csv(comments, 'data/comments_2024.csv')
+    print(f"Saved {len(comments)} comments to data/comments_2024.csv")
 
 def run_data_cleaning():
     print("Running data cleaning...")
@@ -34,6 +34,6 @@ if __name__ == "__main__":
         os.makedirs('data')
 
     # run_data_fetching()
-    run_data_cleaning()
+    # run_data_cleaning()
     run_sentiment_analysis()
 
